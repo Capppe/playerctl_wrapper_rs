@@ -1,54 +1,39 @@
+use crate::playerctld::{DBusProxy, Methods, Signals};
+use dbus::arg::{self, ReadAll};
 use dbus::blocking::Connection;
+use tokio::sync::mpsc::Sender;
 
 use crate::dbus_utils;
-use crate::introspectable::Introspectable;
-use crate::media_player::MediaPlayer;
-use crate::peer::Peer;
-use crate::player::Player;
-use crate::playlists::Playlists;
-use crate::properties::Properties;
-use crate::tracklist::Tracklist;
 use std::fmt::Debug;
 use std::time::Duration;
-
-pub trait DBusProxy<'a> {
-    fn get_proxy(
-        &'a self,
-        object_path: Option<&'a str>,
-    ) -> Result<dbus::blocking::Proxy<&Connection>, String>;
-}
-
-pub struct PlayerCtld {
-    pub playerctl: PlayerCtl,
-    pub introspectable: Introspectable,
-    pub peer: Peer,
-    pub properties: Properties,
-    pub media_player: MediaPlayer,
-    pub player: Player,
-    pub playlists: Playlists,
-    pub tracklist: Tracklist,
-}
-
-impl PlayerCtld {
-    pub fn new() -> Result<Self, dbus::Error> {
-        Ok(Self {
-            playerctl: PlayerCtl::new()?,
-            introspectable: Introspectable::new()?,
-            peer: Peer::new()?,
-            properties: Properties::new()?,
-            media_player: MediaPlayer::new()?,
-            player: Player::new()?,
-            playlists: Playlists::new()?,
-            tracklist: Tracklist::new()?,
-        })
-    }
-}
 
 pub struct PlayerCtl {
     properties: Vec<Property>,
     interface: String,
     object_path: String,
     connection: Connection,
+}
+
+// Signals
+struct ActivePlayerChangeBegin {
+    sender: String,
+}
+
+impl arg::AppendAll for ActivePlayerChangeBegin {
+    fn append(&self, i: &mut arg::IterAppend) {
+        arg::RefArg::append(&self.sender, i);
+    }
+}
+
+impl arg::ReadAll for ActivePlayerChangeBegin {
+    fn read(i: &mut arg::Iter) -> Result<Self, arg::TypeMismatchError> {
+        Ok(ActivePlayerChangeBegin { sender: i.read()? })
+    }
+}
+
+impl dbus::message::SignalArgs for ActivePlayerChangeBegin {
+    const NAME: &'static str = "ActivePlayerChangeBegin";
+    const INTERFACE: &'static str = "com.github.altdesktop.playerctld";
 }
 
 impl<'a> DBusProxy<'a> for PlayerCtl {
@@ -67,6 +52,24 @@ impl<'a> DBusProxy<'a> for PlayerCtl {
     }
 }
 
+impl Signals for PlayerCtl {}
+
+impl Methods for PlayerCtl {
+    fn call_method<T, A>(&self, method: &str, args: A) -> Result<T, String>
+    where
+        T: for<'z> dbus::arg::Get<'z> + dbus::arg::Arg,
+        A: dbus::arg::AppendAll,
+    {
+        let proxy = self.get_proxy(None)?;
+
+        let (value,): (T,) = proxy
+            .method_call(&self.interface, method, args)
+            .map_err(|e| format!("Failed to call method {}, cause: {}", method, e))?;
+
+        Ok(value)
+    }
+}
+
 impl PlayerCtl {
     pub fn new() -> Result<Self, dbus::Error> {
         Ok(Self {
@@ -77,6 +80,7 @@ impl PlayerCtl {
         })
     }
 
+    // Methods
     pub fn shift(&self) -> Result<String, String> {
         let proxy = self.get_proxy(None)?;
 
@@ -96,13 +100,6 @@ impl PlayerCtl {
 
         Ok(new_player)
     }
-}
-
-pub struct Method {
-    name: String,
-    args: Option<()>,
-    returns: Option<()>,
-    handler: Box<dyn Fn() -> String>,
 }
 
 #[derive(Debug, Default)]

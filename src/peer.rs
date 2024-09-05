@@ -3,10 +3,7 @@ use std::time::Duration;
 use dbus::blocking::Connection;
 use tokio::signal::unix::Signal;
 
-use crate::{
-    dbus_utils,
-    playerctl::{DBusProxy, Property},
-};
+use crate::{dbus_utils, playerctl::Property, playerctld::DBusProxy};
 
 pub struct Peer {
     properties: Vec<Property>,

@@ -2,13 +2,9 @@ use std::time::Duration;
 
 use dbus::blocking::Connection;
 
-use crate::{
-    dbus_utils,
-    playerctl::{DBusProxy, Property},
-};
+use crate::{dbus_utils, playerctld::DBusProxy};
 
 pub struct Introspectable {
-    properties: Vec<Property>,
     interface: String,
     object_path: String,
     connection: Connection,
@@ -33,7 +29,6 @@ impl<'a> DBusProxy<'a> for Introspectable {
 impl Introspectable {
     pub fn new() -> Result<Self, dbus::Error> {
         Ok(Self {
-            properties: Vec::new(),
             interface: "org.freedesktop.DBus.Introspectable".to_string(),
             object_path: "/org/mpris/MediaPlayer2".to_string(),
             connection: Connection::new_session()?,

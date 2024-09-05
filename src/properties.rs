@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use dbus::blocking::Connection;
 
-use crate::{dbus_utils, playerctl::DBusProxy};
+use crate::{dbus_utils, playerctld::DBusProxy};
 
 pub struct Properties {
     interface: String,

@@ -2,10 +2,7 @@ use std::time::Duration;
 
 use dbus::{arg::PropMap, blocking::Connection, Path};
 
-use crate::{
-    dbus_utils,
-    playerctl::{DBusProxy, Property},
-};
+use crate::{dbus_utils, playerctl::Property, playerctld::DBusProxy};
 
 pub struct Tracklist {
     properties: Vec<Property>,

@@ -1,9 +1,6 @@
 use std::time::Duration;
 
-use crate::{
-    dbus_utils,
-    playerctl::{DBusProxy, Property},
-};
+use crate::{dbus_utils, playerctl::Property, playerctld::DBusProxy};
 use dbus::{blocking::Connection, Path};
 
 pub struct Player {

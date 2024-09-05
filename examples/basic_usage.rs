@@ -1,4 +1,4 @@
-use playerctl_wrapper_rs::playerctl::PlayerCtld;
+use playerctl_wrapper_rs::playerctld::PlayerCtld;
 
 fn main() {
     let playerctld = PlayerCtld::new();

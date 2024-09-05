@@ -2,10 +2,7 @@ use std::time::Duration;
 
 use dbus::{blocking::Connection, Path};
 
-use crate::{
-    dbus_utils,
-    playerctl::{DBusProxy, Property},
-};
+use crate::{dbus_utils, playerctl::Property, playerctld::DBusProxy};
 
 type PlaylistType<'a> = Vec<(Path<'a>, String, String)>;
 

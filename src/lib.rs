@@ -4,6 +4,7 @@ pub mod media_player;
 pub mod peer;
 pub mod player;
 pub mod playerctl;
+pub mod playerctld;
 pub mod playlists;
 pub mod properties;
 pub mod tracklist;

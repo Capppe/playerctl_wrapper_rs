@@ -2,10 +2,7 @@ use std::time::Duration;
 
 use dbus::blocking::Connection;
 
-use crate::{
-    dbus_utils,
-    playerctl::{DBusProxy, Property},
-};
+use crate::{dbus_utils, playerctl::Property, playerctld::DBusProxy};
 
 pub struct MediaPlayer {
     properties: Vec<Property>,
