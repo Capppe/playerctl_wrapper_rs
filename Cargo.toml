@@ -4,3 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+dbus = { version = "0.9.7", features = ["futures"] }
+regex = "1.10.6"
+tokio = { version = "1.38.0", features = ["full"] }

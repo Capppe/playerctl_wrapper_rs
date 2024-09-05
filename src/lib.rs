@@ -1,14 +1,10 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub mod dbus_utils;
+pub mod introspectable;
+pub mod media_player;
+pub mod peer;
+pub mod player;
+pub mod playerctl;
+pub mod playlists;
+pub mod properties;
+pub mod tracklist;
+pub mod utils;
