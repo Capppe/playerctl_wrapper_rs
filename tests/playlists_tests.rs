@@ -2,19 +2,14 @@ extern crate playerctl_wrapper_rs;
 
 #[cfg(test)]
 mod tests {
-    use dbus::arg::PropMap;
-    use dbus::Path;
-    use playerctl_wrapper_rs::playerctld::{Methods, Signals};
+    use playerctl_wrapper_rs::playerctld::Signals;
     use playerctl_wrapper_rs::playlists::Playlists;
-    use playerctl_wrapper_rs::properties::Properties;
 
     #[test]
     fn test_method_activateplaylist() {
         let props = Playlists::new().unwrap();
 
-        let res = props
-            .call_method_no_return("ActivatePlaylist", ("PlaylistId",))
-            .unwrap();
+        let res = props.activate_playlist("PlaylistId".into()).unwrap();
 
         assert!(res == ())
     }
@@ -24,11 +19,7 @@ mod tests {
     fn test_method_getplaylists() {
         let props = Playlists::new().unwrap();
 
-        let playlists: Vec<(Path, String, String)> = props
-            .call_method("GetPlaylists", (1 as u32, 1 as u32, "", false))
-            .unwrap();
-
-        println!("Playlists: {:?}", playlists);
+        let playlists = props.get_playlists(1 as u32, 1 as u32, "", false).unwrap();
 
         assert!(playlists.is_empty())
     }

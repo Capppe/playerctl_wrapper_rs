@@ -1,7 +1,10 @@
-use dbus::blocking::{Connection, Proxy};
+use std::time::Duration;
+
+use dbus::blocking::Connection;
 use dbus::message::MatchRule;
 use tokio::sync::mpsc::Sender;
 
+use crate::dbus_utils;
 use crate::introspectable::Introspectable;
 use crate::media_player::MediaPlayer;
 use crate::peer::Peer;
@@ -11,12 +14,30 @@ use crate::playlists::Playlists;
 use crate::properties::Properties;
 use crate::tracklist::Tracklist;
 
+pub trait DBusItem {
+    fn get_interface(&self) -> &str;
+    fn get_object_path(&self) -> &str;
+    fn get_connection(&self) -> &Connection;
+}
+
 pub trait DBusProxy<'a> {
     fn get_proxy(
         &'a self,
         dest: Option<&'a str>,
         object_path: Option<&'a str>,
-    ) -> Result<dbus::blocking::Proxy<&Connection>, String>;
+    ) -> Result<dbus::blocking::Proxy<&Connection>, String>
+    where
+        Self: DBusItem,
+    {
+        let proxy = dbus_utils::create_proxy(
+            dest,
+            object_path.unwrap_or(&self.get_object_path()),
+            Duration::from_secs(5),
+            &self.get_connection(),
+        )?;
+
+        Ok(proxy)
+    }
 }
 
 pub trait Signals {
@@ -66,13 +87,12 @@ pub trait Methods {
     where
         T: for<'z> dbus::arg::Get<'z> + dbus::arg::Arg,
         A: dbus::arg::AppendAll,
-        Self: for<'a> DBusProxy<'a>,
+        Self: for<'a> DBusProxy<'a> + DBusItem,
     {
         let proxy = self.get_proxy(None, None)?;
 
         let (value,): (T,) = proxy
-            // .method_call(interface, method, args)
-            .method_call(self.interface(), method, args)
+            .method_call(self.get_interface(), method, args)
             .map_err(|e| format!("Failed to call method {}, cause: {}", method, e))?;
 
         Ok(value)
@@ -81,18 +101,16 @@ pub trait Methods {
     fn call_method_no_return<A>(&self, method: &str, args: A) -> Result<(), String>
     where
         A: dbus::arg::AppendAll,
-        Self: for<'a> DBusProxy<'a>,
+        Self: for<'a> DBusProxy<'a> + DBusItem,
     {
         let proxy = self.get_proxy(None, None)?;
 
         proxy
-            .method_call(self.interface(), method, args)
+            .method_call(self.get_interface(), method, args)
             .map_err(|e| format!("Failed to call method {}, cause: {}", method, e))?;
 
         Ok(())
     }
-
-    fn interface(&self) -> &str;
 }
 
 pub struct PlayerCtld {

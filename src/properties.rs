@@ -1,16 +1,33 @@
 use std::time::Duration;
 
-use dbus::blocking::Connection;
+use dbus::{
+    arg::{Append, Variant},
+    blocking::Connection,
+};
 
 use crate::{
     dbus_utils,
-    playerctld::{DBusProxy, Methods, Signals},
+    playerctld::{DBusItem, DBusProxy, Methods, Signals},
 };
 
 pub struct Properties {
     pub interface: String,
     object_path: String,
     connection: Connection,
+}
+
+impl DBusItem for Properties {
+    fn get_interface(&self) -> &str {
+        &self.interface
+    }
+
+    fn get_object_path(&self) -> &str {
+        &self.object_path
+    }
+
+    fn get_connection(&self) -> &Connection {
+        &self.connection
+    }
 }
 
 impl<'a> DBusProxy<'a> for Properties {
@@ -32,11 +49,7 @@ impl<'a> DBusProxy<'a> for Properties {
 
 impl Signals for Properties {}
 
-impl Methods for Properties {
-    fn interface(&self) -> &str {
-        &self.interface
-    }
-}
+impl Methods for Properties {}
 
 impl Properties {
     pub fn new() -> Result<Self, dbus::Error> {
@@ -47,48 +60,24 @@ impl Properties {
         })
     }
 
-    pub fn get(&self, interface_name: String, property_name: String) -> Result<String, String> {
-        let proxy = self
-            .get_proxy(None, None)
-            .map_err(|e| format!("Failed to create a proxy: {}", e))?;
-
-        let (property,): (String,) = proxy
-            .method_call(&self.interface, "Get", (interface_name, property_name))
-            .map_err(|e| format!("Failed to get property: {}", e))?;
-
-        Ok(property)
+    // Methods
+    pub fn get(&self, interface_name: &str, property_name: &str) -> Result<String, String> {
+        self.call_method("Get", (interface_name, property_name))
     }
 
-    pub fn get_all(&self, interface_name: String) -> Result<Vec<String>, String> {
-        let proxy = self
-            .get_proxy(None, None)
-            .map_err(|e| format!("Failed to create a proxy: {}", e))?;
-
-        let (properties,): (Vec<String>,) = proxy
-            .method_call(&self.interface, "GetAll", (interface_name,))
-            .map_err(|e| format!("Failed to get all properties: {}", e))?;
-
-        Ok(properties)
+    pub fn get_all(&self, interface_name: &str) -> Result<Vec<String>, String> {
+        self.call_method("GetAll", (interface_name,))
     }
 
-    pub fn set(
+    pub fn set<T>(
         &self,
-        interface_name: String,
-        property_name: String,
-        value: String,
-    ) -> Result<(), String> {
-        let proxy = self
-            .get_proxy(None, None)
-            .map_err(|e| format!("Failed to create a proxy: {}", e))?;
-
-        proxy
-            .method_call(
-                &self.interface,
-                "Set",
-                (interface_name, property_name, value),
-            )
-            .map_err(|e| format!("Failed to set property: {}", e))?;
-
-        Ok(())
+        interface_name: &str,
+        property_name: &str,
+        value: Variant<T>,
+    ) -> Result<(), String>
+    where
+        T: Append + dbus::arg::Arg,
+    {
+        self.call_method_no_return("Set", (interface_name, property_name, value))
     }
 }

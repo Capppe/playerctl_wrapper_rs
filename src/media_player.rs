@@ -5,7 +5,7 @@ use dbus::blocking::Connection;
 use crate::{
     dbus_utils,
     playerctl::Property,
-    playerctld::{DBusProxy, Methods},
+    playerctld::{DBusItem, DBusProxy, Methods},
 };
 
 pub struct MediaPlayer {
@@ -13,6 +13,20 @@ pub struct MediaPlayer {
     interface: String,
     object_path: String,
     connection: Connection,
+}
+
+impl DBusItem for MediaPlayer {
+    fn get_interface(&self) -> &str {
+        &self.interface
+    }
+
+    fn get_object_path(&self) -> &str {
+        &self.object_path
+    }
+
+    fn get_connection(&self) -> &Connection {
+        &self.connection
+    }
 }
 
 impl<'a> DBusProxy<'a> for MediaPlayer {
@@ -32,11 +46,7 @@ impl<'a> DBusProxy<'a> for MediaPlayer {
     }
 }
 
-impl Methods for MediaPlayer {
-    fn interface(&self) -> &str {
-        &self.interface
-    }
-}
+impl Methods for MediaPlayer {}
 
 impl MediaPlayer {
     pub fn new() -> Result<Self, dbus::Error> {
@@ -48,27 +58,12 @@ impl MediaPlayer {
         })
     }
 
-    // pub fn quit(&self) -> Result<(), String> {
-    //     let proxy = self
-    //         .get_proxy(None, None)
-    //         .map_err(|e| format!("Failed to create a proxy: {}", e))?;
-    //
-    //     proxy
-    //         .method_call(&self.interface, "Quit", ())
-    //         .map_err(|e| format!("Failed to quit: {}", e))?;
-    //
-    //     Ok(())
-    // }
-    //
-    // pub fn raise(&self) -> Result<(), String> {
-    //     let proxy = self
-    //         .get_proxy(None, None)
-    //         .map_err(|e| format!("Failed to create a proxy: {}", e))?;
-    //
-    //     proxy
-    //         .method_call(&self.interface, "Raise", ())
-    //         .map_err(|e| format!("Failed to raise: {}", e))?;
-    //
-    //     Ok(())
-    // }
+    // Methods
+    pub fn quit(&self) -> Result<(), String> {
+        self.call_method_no_return("Quit", ())
+    }
+
+    pub fn raise(&self) -> Result<(), String> {
+        self.call_method_no_return("Raise", ())
+    }
 }

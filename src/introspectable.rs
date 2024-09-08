@@ -4,13 +4,27 @@ use dbus::blocking::Connection;
 
 use crate::{
     dbus_utils,
-    playerctld::{DBusProxy, Methods},
+    playerctld::{DBusItem, DBusProxy, Methods},
 };
 
 pub struct Introspectable {
     pub interface: String,
     object_path: String,
     connection: Connection,
+}
+
+impl DBusItem for Introspectable {
+    fn get_interface(&self) -> &str {
+        &self.interface
+    }
+
+    fn get_object_path(&self) -> &str {
+        &self.object_path
+    }
+
+    fn get_connection(&self) -> &Connection {
+        &self.connection
+    }
 }
 
 impl<'a> DBusProxy<'a> for Introspectable {
@@ -30,11 +44,7 @@ impl<'a> DBusProxy<'a> for Introspectable {
     }
 }
 
-impl Methods for Introspectable {
-    fn interface(&self) -> &str {
-        &self.interface
-    }
-}
+impl Methods for Introspectable {}
 
 impl Introspectable {
     pub fn new() -> Result<Self, dbus::Error> {
@@ -43,5 +53,9 @@ impl Introspectable {
             object_path: "/org/mpris/MediaPlayer2".to_string(),
             connection: Connection::new_session()?,
         })
+    }
+
+    pub fn introspect(&self) -> Result<String, String> {
+        self.call_method("Introspect", ())
     }
 }

@@ -3,13 +3,13 @@ extern crate playerctl_wrapper_rs;
 #[cfg(test)]
 mod tests {
     use dbus::Path;
-    use playerctl_wrapper_rs::{player::Player, playerctld::Methods};
+    use playerctl_wrapper_rs::player::Player;
 
     #[test]
     fn test_method_next() {
         let player = Player::new().unwrap();
 
-        let res = player.call_method_no_return("Next", ()).unwrap();
+        let res = player.next().unwrap();
 
         assert!(res == ())
     }
@@ -19,10 +19,7 @@ mod tests {
         let player = Player::new().unwrap();
 
         let res = player
-            .call_method_no_return(
-                "OpenUri",
-                ("https://open.spotify.com/track/1mFrjW8e8fuAOowlU3Q3Dr",),
-            )
+            .open_uri("https://open.spotify.com/track/1mFrjW8e8fuAOowlU3Q3Dr")
             .unwrap();
 
         assert!(res == ())
@@ -32,7 +29,7 @@ mod tests {
     fn test_method_pause() {
         let player = Player::new().unwrap();
 
-        let res = player.call_method_no_return("Pause", ()).unwrap();
+        let res = player.pause().unwrap();
 
         assert!(res == ())
     }
@@ -41,7 +38,7 @@ mod tests {
     fn test_method_playpause() {
         let player = Player::new().unwrap();
 
-        let res = player.call_method_no_return("PlayPause", ()).unwrap();
+        let res = player.play_pause().unwrap();
 
         assert!(res == ())
     }
@@ -50,7 +47,7 @@ mod tests {
     fn test_method_previous() {
         let player = Player::new().unwrap();
 
-        let res = player.call_method_no_return("Previous", ()).unwrap();
+        let res = player.previous().unwrap();
 
         assert!(res == ())
     }
@@ -59,7 +56,7 @@ mod tests {
     fn test_method_seek() {
         let player = Player::new().unwrap();
 
-        let res = player.call_method_no_return("Seek", (10000000,)).unwrap();
+        let res = player.seek(10000000).unwrap();
 
         assert!(res == ())
     }
@@ -68,9 +65,7 @@ mod tests {
     fn test_method_setposition() {
         let player = Player::new().unwrap();
 
-        let res = player
-            .call_method_no_return("SetPosition", (Path::from("test"), 10000000))
-            .unwrap();
+        let res = player.set_position(Path::from("test"), 10000000).unwrap();
 
         assert!(res == ())
     }
@@ -79,7 +74,7 @@ mod tests {
     fn test_method_stop() {
         let player = Player::new().unwrap();
 
-        let res = player.call_method_no_return("Stop", ()).unwrap();
+        let res = player.stop().unwrap();
 
         assert!(res == ())
     }

@@ -3,7 +3,7 @@ use std::time::Duration;
 use crate::{
     dbus_utils,
     playerctl::Property,
-    playerctld::{DBusProxy, Methods, Signals},
+    playerctld::{DBusItem, DBusProxy, Methods, Signals},
 };
 use dbus::{blocking::Connection, Path};
 
@@ -12,6 +12,20 @@ pub struct Player {
     interface: String,
     object_path: String,
     connection: Connection,
+}
+
+impl DBusItem for Player {
+    fn get_interface(&self) -> &str {
+        &self.interface
+    }
+
+    fn get_object_path(&self) -> &str {
+        &self.object_path
+    }
+
+    fn get_connection(&self) -> &Connection {
+        &self.connection
+    }
 }
 
 impl<'a> DBusProxy<'a> for Player {
@@ -33,11 +47,7 @@ impl<'a> DBusProxy<'a> for Player {
 
 impl Signals for Player {}
 
-impl Methods for Player {
-    fn interface(&self) -> &str {
-        &self.interface
-    }
-}
+impl Methods for Player {}
 
 impl Player {
     pub fn new() -> Result<Self, dbus::Error> {
@@ -49,67 +59,36 @@ impl Player {
         })
     }
 
-    // pub fn next(&self) -> Result<(), String> {
-    //     let proxy = self.get_proxy(None, None)?;
-    //
-    //     proxy
-    //         .method_call(&self.interface, "Next", ())
-    //         .map_err(|e| format!("Failed to call method Next: {}", e))
-    // }
-    //
-    // fn open_uri(&self, uri: String) -> Result<(), String> {
-    //     let proxy = self.get_proxy(None, None)?;
-    //
-    //     proxy
-    //         .method_call(&self.interface, "OpenUri", (uri,))
-    //         .map_err(|e| format!("Failed to call method OpenUri: {}", e))
-    // }
-    //
-    // fn pause(&self) -> Result<(), String> {
-    //     let proxy = self.get_proxy(None, None)?;
-    //
-    //     proxy
-    //         .method_call(&self.interface, "Pause", ())
-    //         .map_err(|e| format!("Failed to call method Pause: {}", e))
-    // }
-    //
-    // fn play_pause(&self) -> Result<(), String> {
-    //     let proxy = self.get_proxy(None, None)?;
-    //
-    //     proxy
-    //         .method_call(&self.interface, "PlayPause", ())
-    //         .map_err(|e| format!("Failed to call method PlayPause: {}", e))
-    // }
-    //
-    // fn previous(&self) -> Result<(), String> {
-    //     let proxy = self.get_proxy(None, None)?;
-    //
-    //     proxy
-    //         .method_call(&self.interface, "Previous", ())
-    //         .map_err(|e| format!("Failed to call method Previous: {}", e))
-    // }
-    //
-    // fn seek(&self, offset: i64) -> Result<(), String> {
-    //     let proxy = self.get_proxy(None, None)?;
-    //
-    //     proxy
-    //         .method_call(&self.interface, "Seek", (offset,))
-    //         .map_err(|e| format!("Failed to call method Seek: {}", e))
-    // }
-    //
-    // fn set_position(&self, track_id: Path, offset: i64) -> Result<(), String> {
-    //     let proxy = self.get_proxy(None, None)?;
-    //
-    //     proxy
-    //         .method_call(&self.interface, "SetPosition", (track_id, offset))
-    //         .map_err(|e| format!("Failed to call method SetPosition: {}", e))
-    // }
-    //
-    // fn stop(&self) -> Result<(), String> {
-    //     let proxy = self.get_proxy(None, None)?;
-    //
-    //     proxy
-    //         .method_call(&self.interface, "Stop", ())
-    //         .map_err(|e| format!("Failed to call method Stop: {}", e))
-    // }
+    // Methods
+    pub fn next(&self) -> Result<(), String> {
+        self.call_method_no_return("Next", ())
+    }
+
+    pub fn open_uri(&self, uri: &str) -> Result<(), String> {
+        self.call_method_no_return("OpenUri", (uri,))
+    }
+
+    pub fn pause(&self) -> Result<(), String> {
+        self.call_method_no_return("Pause", ())
+    }
+
+    pub fn play_pause(&self) -> Result<(), String> {
+        self.call_method_no_return("PlayPause", ())
+    }
+
+    pub fn previous(&self) -> Result<(), String> {
+        self.call_method_no_return("Previous", ())
+    }
+
+    pub fn seek(&self, offset: i64) -> Result<(), String> {
+        self.call_method_no_return("Seek", (offset,))
+    }
+
+    pub fn set_position(&self, track_id: Path, offset: i64) -> Result<(), String> {
+        self.call_method_no_return("SetPosition", (track_id, offset))
+    }
+
+    pub fn stop(&self) -> Result<(), String> {
+        self.call_method_no_return("Stop", ())
+    }
 }

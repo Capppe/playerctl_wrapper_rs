@@ -5,7 +5,7 @@ use dbus::{arg::PropMap, blocking::Connection, Path};
 use crate::{
     dbus_utils,
     playerctl::Property,
-    playerctld::{DBusProxy, Methods, Signals},
+    playerctld::{DBusItem, DBusProxy, Methods, Signals},
 };
 
 pub struct Tracklist {
@@ -13,6 +13,20 @@ pub struct Tracklist {
     interface: String,
     object_path: String,
     connection: Connection,
+}
+
+impl DBusItem for Tracklist {
+    fn get_interface(&self) -> &str {
+        &self.interface
+    }
+
+    fn get_object_path(&self) -> &str {
+        &self.object_path
+    }
+
+    fn get_connection(&self) -> &Connection {
+        &self.connection
+    }
 }
 
 impl<'a> DBusProxy<'a> for Tracklist {
@@ -34,11 +48,7 @@ impl<'a> DBusProxy<'a> for Tracklist {
 
 impl Signals for Tracklist {}
 
-impl Methods for Tracklist {
-    fn interface(&self) -> &str {
-        &self.interface
-    }
-}
+impl Methods for Tracklist {}
 
 impl Tracklist {
     pub fn new() -> Result<Self, dbus::Error> {
@@ -50,52 +60,25 @@ impl Tracklist {
         })
     }
 
-    // pub fn add_track(
-    //     &self,
-    //     uri: String,
-    //     after_track: Path,
-    //     set_as_current: bool,
-    // ) -> Result<(), String> {
-    //     let proxy = self.get_proxy(None, None)?;
-    //
-    //     proxy
-    //         .method_call(
-    //             &self.interface,
-    //             "AddTrack",
-    //             (uri, after_track, set_as_current),
-    //         )
-    //         .map_err(|e| format!("Failed to add track: {}", e))?;
-    //
-    //     Ok(())
-    // }
-    //
-    // pub fn get_tracks_metadata(&self, track_ids: Vec<Path>) -> Result<Vec<PropMap>, String> {
-    //     let proxy = self.get_proxy(None, None)?;
-    //
-    //     let (metadata,): (Vec<PropMap>,) = proxy
-    //         .method_call(&self.interface, "GetTracksMetadata", (track_ids,))
-    //         .map_err(|e| format!("Failed to get tracks metadata: {}", e))?;
-    //
-    //     Ok(metadata)
-    // }
-    //
-    // pub fn go_to(&self, track_id: Path) -> Result<(), String> {
-    //     let proxy = self.get_proxy(None, None)?;
-    //
-    //     proxy
-    //         .method_call(&self.interface, "GetTracksMetadata", (track_id,))
-    //         .map_err(|e| format!("Failed to get tracks metadata: {}", e))?;
-    //
-    //     Ok(())
-    // }
-    //
-    // pub fn remove_track(&self, track_id: Path) -> Result<(), String> {
-    //     let proxy = self.get_proxy(None, None)?;
-    //
-    //     proxy
-    //         .method_call(&self.interface, "RemoveTrack", (track_id,))
-    //         .map_err(|e| format!("Failed to remove track: {}", e))?;
-    //
-    //     Ok(())
-    // }
+    // Methods
+    pub fn add_track(
+        &self,
+        uri: &str,
+        after_track: Path,
+        set_as_current: bool,
+    ) -> Result<(), String> {
+        self.call_method_no_return("AddTrack", (uri, after_track, set_as_current))
+    }
+
+    pub fn get_tracks_metadata(&self, track_ids: Vec<Path>) -> Result<Vec<PropMap>, String> {
+        self.call_method("GetTracksMetadata", (track_ids,))
+    }
+
+    pub fn go_to(&self, track_id: Path) -> Result<(), String> {
+        self.call_method_no_return("GoTo", (track_id,))
+    }
+
+    pub fn remove_track(&self, track_id: Path) -> Result<(), String> {
+        self.call_method_no_return("RemoveTrack", (track_id,))
+    }
 }

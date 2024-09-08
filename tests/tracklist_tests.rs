@@ -2,9 +2,8 @@ extern crate playerctl_wrapper_rs;
 
 #[cfg(test)]
 mod tests {
-    use dbus::arg::{PropMap, RefArg, Variant};
-    use playerctl_wrapper_rs::playerctld::{Methods, Signals};
-    use playerctl_wrapper_rs::properties::Properties;
+    use dbus::arg::PropMap;
+    use playerctl_wrapper_rs::playerctld::Signals;
     use playerctl_wrapper_rs::tracklist::Tracklist;
 
     #[test]
@@ -12,7 +11,7 @@ mod tests {
         let tracklist = Tracklist::new().unwrap();
 
         let metadata = tracklist
-            .call_method_no_return("AddTrack", ("uri", "aftertrack", false))
+            .add_track("uri", "aftertrack".into(), false)
             .unwrap();
 
         assert!(metadata == ())
@@ -22,11 +21,7 @@ mod tests {
     fn test_method_gettracksmetadata() {
         let props = Tracklist::new().unwrap();
 
-        let metadata: Vec<PropMap> = props
-            .call_method("GetTracksMetadata", (vec!["trackids"],))
-            .unwrap();
-
-        println!("Metadata: {:?}", metadata);
+        let metadata: Vec<PropMap> = props.get_tracks_metadata(vec!["trackids".into()]).unwrap();
 
         assert!(!metadata.is_empty())
     }
@@ -35,16 +30,14 @@ mod tests {
     fn test_method_goto() {
         let props = Tracklist::new().unwrap();
 
-        props.call_method_no_return("GoTo", ("Trackid",)).unwrap();
+        props.go_to("Trackid".into()).unwrap();
     }
 
     #[test]
     fn test_method_removetrack() {
         let props = Tracklist::new().unwrap();
 
-        props
-            .call_method_no_return("RemoveTrack", ("Trackid",))
-            .unwrap();
+        props.remove_track("Trackid".into()).unwrap();
     }
 
     #[tokio::test]

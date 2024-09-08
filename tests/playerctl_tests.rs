@@ -3,15 +3,13 @@ extern crate playerctl_wrapper_rs;
 #[cfg(test)]
 mod tests {
     use playerctl_wrapper_rs::playerctl::PlayerCtl;
-    use playerctl_wrapper_rs::playerctld::{Methods, Signals};
+    use playerctl_wrapper_rs::playerctld::Signals;
 
     #[test]
     fn test_method_shift() {
         let playerctl = PlayerCtl::new().unwrap();
 
-        let player: String = playerctl.call_method("Shift", ()).unwrap();
-
-        println!("Player: {}", player);
+        let player = playerctl.shift().unwrap();
 
         assert!(player != "");
     }
@@ -20,9 +18,7 @@ mod tests {
     fn test_method_unshift() {
         let playerctl = PlayerCtl::new().unwrap();
 
-        let player: String = playerctl.call_method("Unshift", ()).unwrap();
-
-        println!("Player: {}", player);
+        let player = playerctl.unshift().unwrap();
 
         assert!(player != "");
     }

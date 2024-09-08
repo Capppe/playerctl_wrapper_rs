@@ -9,11 +9,11 @@ mod tests {
     fn test_method_get_machine_id() {
         let peer = Peer::new().unwrap();
 
-        let player: String = peer.call_method("GetMachineId", ()).unwrap();
+        let machine_id = peer.get_machine_id().unwrap();
 
-        println!("Player: {}", player);
+        println!("Player: {}", machine_id);
 
-        assert!(player != "");
+        assert!(machine_id != "");
     }
 
     #[test]
