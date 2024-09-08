@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use dbus::arg::Variant;
 use dbus::blocking::Connection;
 use dbus::message::MatchRule;
 use tokio::sync::mpsc::Sender;
@@ -11,7 +12,7 @@ use crate::peer::Peer;
 use crate::player::Player;
 use crate::playerctl::PlayerCtl;
 use crate::playlists::Playlists;
-use crate::properties::Properties;
+use crate::properties;
 use crate::tracklist::Tracklist;
 
 pub trait DBusItem {
@@ -113,11 +114,51 @@ pub trait Methods {
     }
 }
 
+pub trait Properties {
+    fn get_property<T>(&self, property: &str) -> Result<T, String>
+    where
+        Self: DBusItem,
+        T: dbus::arg::Arg + for<'z> dbus::arg::Get<'z>,
+    {
+        if let Ok(props) = properties::Properties::new() {
+            let prop: T = props.get(&self.get_interface(), property)?;
+            Ok(prop)
+        } else {
+            Err(format!("Failed to get properties"))
+        }
+    }
+
+    fn get_all_properties<T>(&self) -> Result<Vec<T>, String>
+    where
+        Self: DBusItem,
+        T: dbus::arg::Arg + for<'z> dbus::arg::Get<'z>,
+    {
+        if let Ok(props) = properties::Properties::new() {
+            let prop: Vec<T> = props.get_all(&self.get_interface())?;
+            Ok(prop)
+        } else {
+            Err(format!("Failed to get all properties"))
+        }
+    }
+
+    fn set_property<T>(&self, property: &str, value: Variant<T>) -> Result<(), String>
+    where
+        Self: DBusItem,
+        T: dbus::arg::Arg + for<'z> dbus::arg::Get<'z> + dbus::arg::Append,
+    {
+        if let Ok(props) = properties::Properties::new() {
+            props.set(&self.get_interface(), property, value)
+        } else {
+            Err(format!("Failed to set properties"))
+        }
+    }
+}
+
 pub struct PlayerCtld {
     pub playerctl: PlayerCtl,
     pub introspectable: Introspectable,
     pub peer: Peer,
-    pub properties: Properties,
+    // pub properties: Properties,
     pub media_player: MediaPlayer,
     pub player: Player,
     pub playlists: Playlists,
@@ -130,7 +171,7 @@ impl PlayerCtld {
             playerctl: PlayerCtl::new()?,
             introspectable: Introspectable::new()?,
             peer: Peer::new()?,
-            properties: Properties::new()?,
+            // properties: Properties::new()?,
             media_player: MediaPlayer::new()?,
             player: Player::new()?,
             playlists: Playlists::new()?,

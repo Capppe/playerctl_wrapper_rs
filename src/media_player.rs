@@ -4,12 +4,10 @@ use dbus::blocking::Connection;
 
 use crate::{
     dbus_utils,
-    playerctl::Property,
     playerctld::{DBusItem, DBusProxy, Methods},
 };
 
 pub struct MediaPlayer {
-    properties: Vec<Property>,
     interface: String,
     object_path: String,
     connection: Connection,
@@ -51,7 +49,6 @@ impl Methods for MediaPlayer {}
 impl MediaPlayer {
     pub fn new() -> Result<Self, dbus::Error> {
         Ok(Self {
-            properties: Vec::new(),
             interface: "org.mpris.MediaPlayer2".to_string(),
             object_path: "/org/mpris/MediaPlayer2".to_string(),
             connection: Connection::new_session()?,

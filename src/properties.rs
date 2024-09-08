@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use dbus::{
-    arg::{Append, Variant},
+    arg::{Append, Arg, Variant},
     blocking::Connection,
 };
 
@@ -61,11 +61,17 @@ impl Properties {
     }
 
     // Methods
-    pub fn get(&self, interface_name: &str, property_name: &str) -> Result<String, String> {
+    pub fn get<T>(&self, interface_name: &str, property_name: &str) -> Result<T, String>
+    where
+        T: Arg + for<'z> dbus::arg::Get<'z>,
+    {
         self.call_method("Get", (interface_name, property_name))
     }
 
-    pub fn get_all(&self, interface_name: &str) -> Result<Vec<String>, String> {
+    pub fn get_all<T>(&self, interface_name: &str) -> Result<Vec<T>, String>
+    where
+        T: Arg + for<'z> dbus::arg::Get<'z>,
+    {
         self.call_method("GetAll", (interface_name,))
     }
 

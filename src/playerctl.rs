@@ -1,10 +1,8 @@
 use crate::playerctld::{DBusItem, DBusProxy, Methods, Signals};
 use dbus::blocking::Connection;
 
-use std::fmt::Debug;
-
 pub struct PlayerCtl {
-    pub interface: String,
+    interface: String,
     object_path: String,
     connection: Connection,
 }
@@ -46,11 +44,4 @@ impl PlayerCtl {
     pub fn unshift(&self) -> Result<String, String> {
         self.call_method("Unshift", ())
     }
-}
-
-#[derive(Debug, Default)]
-pub struct Property {
-    name: String,
-    read: bool,
-    write: bool,
 }

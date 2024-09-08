@@ -4,14 +4,12 @@ use dbus::{blocking::Connection, Path};
 
 use crate::{
     dbus_utils,
-    playerctl::Property,
     playerctld::{DBusItem, DBusProxy, Methods, Signals},
 };
 
 type PlaylistType<'a> = Vec<(Path<'a>, String, String)>;
 
 pub struct Playlists {
-    properties: Vec<Property>,
     interface: String,
     object_path: String,
     connection: Connection,
@@ -55,7 +53,6 @@ impl Methods for Playlists {}
 impl Playlists {
     pub fn new() -> Result<Self, dbus::Error> {
         Ok(Self {
-            properties: Vec::new(),
             interface: "org.mpris.MediaPlayer2.Playlists".to_string(),
             object_path: "/org/mpris/MediaPlayer2".to_string(),
             connection: Connection::new_session()?,
