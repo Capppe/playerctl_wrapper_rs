@@ -33,7 +33,7 @@ impl<'a> Metadata {
         Self::default()
     }
 
-    pub fn from(metadata_str: &PropMap) -> Result<Self, serde_json::Error> {
+    pub fn from(metadata_str: &PropMap) -> Self {
         let mut metadata = Self::new();
 
         for (key, value) in metadata_str {
@@ -104,6 +104,6 @@ impl<'a> Metadata {
             }
         }
 
-        Ok(metadata)
+        metadata
     }
 }

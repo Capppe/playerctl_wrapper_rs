@@ -9,7 +9,7 @@ fn main() {
 
     let metadata: Variant<PropMap> = player.get_property("Metadata").unwrap();
 
-    let parsed = Metadata::from(&metadata.0).unwrap();
+    let parsed = Metadata::from(&metadata.0);
 
     println!(
         "Now playing: {:?} by {:?}",
