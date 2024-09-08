@@ -1,4 +1,4 @@
-use dbus::arg::{PropMap, Variant};
+use dbus::arg::PropMap;
 use playerctl_wrapper::{metadata::Metadata, player::Player, playerctld::Properties};
 
 // Proper error handling omitted
@@ -7,9 +7,9 @@ fn main() {
 
     player.play().unwrap();
 
-    let metadata: Variant<PropMap> = player.get_property("Metadata").unwrap();
+    let metadata: PropMap = player.get_property("Metadata").unwrap();
 
-    let parsed = Metadata::from(&metadata.0);
+    let parsed = Metadata::from(&metadata);
 
     println!(
         "Now playing: {:?} by {:?}",
@@ -19,11 +19,9 @@ fn main() {
 
     player.pause().unwrap();
 
-    let paused = player
-        .get_property::<Variant<String>>("PlaybackStatus")
-        .unwrap();
+    let paused: String = player.get_property("PlaybackStatus").unwrap();
 
-    if paused.0 == "Paused" {
+    if paused == "Paused" {
         println!("Paused!")
     } else {
         println!("Playing!")

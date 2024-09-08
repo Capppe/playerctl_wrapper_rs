@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use dbus::arg::Variant;
+// use dbus::arg::Variant;
 use dbus::blocking::Connection;
 use dbus::message::MatchRule;
 use tokio::sync::mpsc::Sender;
@@ -121,8 +122,8 @@ pub trait Properties {
         T: dbus::arg::Arg + for<'z> dbus::arg::Get<'z>,
     {
         if let Ok(props) = properties::Properties::new() {
-            let prop: T = props.get(&self.get_interface(), property)?;
-            Ok(prop)
+            let prop: Variant<T> = props.get(&self.get_interface(), property)?;
+            Ok(prop.0)
         } else {
             Err(format!("Failed to get properties"))
         }
@@ -141,11 +142,12 @@ pub trait Properties {
         }
     }
 
-    fn set_property<T>(&self, property: &str, value: Variant<T>) -> Result<(), String>
+    fn set_property<T>(&self, property: &str, value: T) -> Result<(), String>
     where
         Self: DBusItem,
         T: dbus::arg::Arg + for<'z> dbus::arg::Get<'z> + dbus::arg::Append,
     {
+        // let variant: Variant<T> = Variant(value);
         if let Ok(props) = properties::Properties::new() {
             props.set(&self.get_interface(), property, value)
         } else {
@@ -158,7 +160,6 @@ pub struct PlayerCtld {
     pub playerctl: PlayerCtl,
     pub introspectable: Introspectable,
     pub peer: Peer,
-    // pub properties: Properties,
     pub media_player: MediaPlayer,
     pub player: Player,
     pub playlists: Playlists,

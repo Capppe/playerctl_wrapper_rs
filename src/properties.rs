@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use dbus::{
-    arg::{Append, Arg, Variant},
+    arg::{Append, Arg},
     blocking::Connection,
 };
 
@@ -75,12 +75,7 @@ impl Properties {
         self.call_method("GetAll", (interface_name,))
     }
 
-    pub fn set<T>(
-        &self,
-        interface_name: &str,
-        property_name: &str,
-        value: Variant<T>,
-    ) -> Result<(), String>
+    pub fn set<T>(&self, interface_name: &str, property_name: &str, value: T) -> Result<(), String>
     where
         T: Append + dbus::arg::Arg,
     {

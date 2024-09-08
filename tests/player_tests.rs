@@ -61,6 +61,7 @@ mod tests {
         assert!(res == ())
     }
 
+    // Fails, expected
     #[test]
     fn test_method_setposition() {
         let player = Player::new().unwrap();
