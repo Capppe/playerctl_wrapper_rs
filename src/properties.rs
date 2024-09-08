@@ -2,10 +2,13 @@ use std::time::Duration;
 
 use dbus::blocking::Connection;
 
-use crate::{dbus_utils, playerctld::DBusProxy};
+use crate::{
+    dbus_utils,
+    playerctld::{DBusProxy, Methods, Signals},
+};
 
 pub struct Properties {
-    interface: String,
+    pub interface: String,
     object_path: String,
     connection: Connection,
 }
@@ -13,16 +16,25 @@ pub struct Properties {
 impl<'a> DBusProxy<'a> for Properties {
     fn get_proxy(
         &'a self,
+        dest: Option<&'a str>,
         object_path: Option<&'a str>,
     ) -> Result<dbus::blocking::Proxy<&Connection>, String> {
         let proxy = dbus_utils::create_proxy(
-            None,
+            dest,
             object_path.unwrap_or(&self.object_path),
             Duration::from_secs(5),
             &self.connection,
         )?;
 
         Ok(proxy)
+    }
+}
+
+impl Signals for Properties {}
+
+impl Methods for Properties {
+    fn interface(&self) -> &str {
+        &self.interface
     }
 }
 
@@ -37,7 +49,7 @@ impl Properties {
 
     pub fn get(&self, interface_name: String, property_name: String) -> Result<String, String> {
         let proxy = self
-            .get_proxy(None)
+            .get_proxy(None, None)
             .map_err(|e| format!("Failed to create a proxy: {}", e))?;
 
         let (property,): (String,) = proxy
@@ -49,7 +61,7 @@ impl Properties {
 
     pub fn get_all(&self, interface_name: String) -> Result<Vec<String>, String> {
         let proxy = self
-            .get_proxy(None)
+            .get_proxy(None, None)
             .map_err(|e| format!("Failed to create a proxy: {}", e))?;
 
         let (properties,): (Vec<String>,) = proxy
@@ -66,7 +78,7 @@ impl Properties {
         value: String,
     ) -> Result<(), String> {
         let proxy = self
-            .get_proxy(None)
+            .get_proxy(None, None)
             .map_err(|e| format!("Failed to create a proxy: {}", e))?;
 
         proxy

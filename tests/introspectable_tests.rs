@@ -2,14 +2,16 @@ extern crate playerctl_wrapper_rs;
 
 #[cfg(test)]
 mod tests {
-    use playerctl_wrapper_rs::introspectable::Introspectable;
+    use playerctl_wrapper_rs::{introspectable::Introspectable, playerctld::Methods};
 
     #[test]
-    fn test_introspect() {
+    fn test_method_introspect() {
         let i = Introspectable::new().unwrap();
 
-        let res = i.introspect();
+        let res: String = i.call_method("Introspect", ()).unwrap();
 
-        assert!(res.is_ok())
+        println!("Introspect: {}", res);
+
+        assert!(res != "")
     }
 }

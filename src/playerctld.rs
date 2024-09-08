@@ -1,5 +1,4 @@
-use dbus::arg::ReadAll;
-use dbus::blocking::Connection;
+use dbus::blocking::{Connection, Proxy};
 use dbus::message::MatchRule;
 use tokio::sync::mpsc::Sender;
 
@@ -15,6 +14,7 @@ use crate::tracklist::Tracklist;
 pub trait DBusProxy<'a> {
     fn get_proxy(
         &'a self,
+        dest: Option<&'a str>,
         object_path: Option<&'a str>,
     ) -> Result<dbus::blocking::Proxy<&Connection>, String>;
 }
@@ -65,7 +65,34 @@ pub trait Methods {
     fn call_method<T, A>(&self, method: &str, args: A) -> Result<T, String>
     where
         T: for<'z> dbus::arg::Get<'z> + dbus::arg::Arg,
-        A: dbus::arg::AppendAll;
+        A: dbus::arg::AppendAll,
+        Self: for<'a> DBusProxy<'a>,
+    {
+        let proxy = self.get_proxy(None, None)?;
+
+        let (value,): (T,) = proxy
+            // .method_call(interface, method, args)
+            .method_call(self.interface(), method, args)
+            .map_err(|e| format!("Failed to call method {}, cause: {}", method, e))?;
+
+        Ok(value)
+    }
+
+    fn call_method_no_return<A>(&self, method: &str, args: A) -> Result<(), String>
+    where
+        A: dbus::arg::AppendAll,
+        Self: for<'a> DBusProxy<'a>,
+    {
+        let proxy = self.get_proxy(None, None)?;
+
+        proxy
+            .method_call(self.interface(), method, args)
+            .map_err(|e| format!("Failed to call method {}, cause: {}", method, e))?;
+
+        Ok(())
+    }
+
+    fn interface(&self) -> &str;
 }
 
 pub struct PlayerCtld {
