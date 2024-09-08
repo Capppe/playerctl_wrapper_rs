@@ -3,7 +3,7 @@ extern crate playerctl_wrapper;
 #[cfg(test)]
 mod tests {
     use playerctl_wrapper::playerctl::PlayerCtl;
-    use playerctl_wrapper::playerctld::Signals;
+    use playerctl_wrapper::playerctld::{DBusItem, Signals};
 
     #[test]
     fn test_method_shift() {
@@ -34,7 +34,7 @@ mod tests {
             }
         });
         let _res = playerctl
-            .start_listener(tx, "ActivePlayerChangeBegin")
+            .start_listener(tx, playerctl.get_interface(), "ActivePlayerChangeBegin")
             .await;
 
         assert!(1 == 2)
@@ -50,7 +50,9 @@ mod tests {
                 println!("Message: {}", message);
             }
         });
-        let _res = playerctl.start_listener(tx, "ActivePlayerChangeEnd").await;
+        let _res = playerctl
+            .start_listener(tx, playerctl.get_interface(), "ActivePlayerChangeEnd")
+            .await;
 
         assert!(1 == 2)
     }

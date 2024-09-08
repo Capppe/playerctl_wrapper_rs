@@ -2,7 +2,7 @@ extern crate playerctl_wrapper;
 
 #[cfg(test)]
 mod tests {
-    use playerctl_wrapper::playerctld::Signals;
+    use playerctl_wrapper::playerctld::{DBusItem, Signals};
     use playerctl_wrapper::playlists::Playlists;
 
     #[test]
@@ -35,6 +35,8 @@ mod tests {
             }
         });
 
-        let _res = playlists.start_listener(tx, "PlaylistChanged").await;
+        let _res = playlists
+            .start_listener(tx, playlists.get_interface(), "PlaylistChanged")
+            .await;
     }
 }

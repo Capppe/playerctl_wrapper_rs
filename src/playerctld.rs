@@ -1,7 +1,6 @@
 use std::time::Duration;
 
 use dbus::arg::Variant;
-// use dbus::arg::Variant;
 use dbus::blocking::Connection;
 use dbus::message::MatchRule;
 use tokio::sync::mpsc::Sender;
@@ -46,6 +45,7 @@ pub trait Signals {
     fn start_listener(
         &self,
         sender: Sender<String>,
+        interface: &str,
         signal: &str,
     ) -> impl std::future::Future<Output = Result<(), String>> + Send {
         async move {
@@ -57,7 +57,7 @@ pub trait Signals {
                 panic!("Lost connection to DBus: {}", err);
             });
 
-            let rule = MatchRule::new_signal("com.github.altdesktop.playerctld", signal.to_owned());
+            let rule = MatchRule::new_signal(interface.to_owned(), signal.to_owned());
 
             use futures_util::stream::StreamExt;
             let (incoming_signal, stream) = connection
@@ -147,7 +147,6 @@ pub trait Properties {
         Self: DBusItem,
         T: dbus::arg::Arg + for<'z> dbus::arg::Get<'z> + dbus::arg::Append,
     {
-        // let variant: Variant<T> = Variant(value);
         if let Ok(props) = properties::Properties::new() {
             props.set(&self.get_interface(), property, value)
         } else {
@@ -172,7 +171,6 @@ impl PlayerCtld {
             playerctl: PlayerCtl::new()?,
             introspectable: Introspectable::new()?,
             peer: Peer::new()?,
-            // properties: Properties::new()?,
             media_player: MediaPlayer::new()?,
             player: Player::new()?,
             playlists: Playlists::new()?,

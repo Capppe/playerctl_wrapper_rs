@@ -1,4 +1,4 @@
-use dbus::arg::RefArg;
+use dbus::arg::{PropMap, RefArg};
 
 pub fn get_string(value: &dyn RefArg) -> Option<String> {
     value.as_str().map(|s| s.to_owned())
@@ -33,5 +33,21 @@ pub fn get_string_vec(value: &dyn RefArg) -> Option<Vec<String>> {
         Some(vec)
     } else {
         None
+    }
+}
+
+pub fn find_in_propmap<T: 'static>(map: PropMap, key: &str) -> Result<T, String>
+where
+    T: std::any::Any + Clone,
+{
+    match map.get(key) {
+        Some(variant) => {
+            if let Some(v) = variant.0.as_ref().as_any().downcast_ref::<T>() {
+                return Ok(v.clone());
+            } else {
+                Err(format!("Failed to cast to the wanted type"))
+            }
+        }
+        None => Err(format!("Failed to find key '{}' in propmap", key)),
     }
 }

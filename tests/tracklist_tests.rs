@@ -3,7 +3,7 @@ extern crate playerctl_wrapper;
 #[cfg(test)]
 mod tests {
     use dbus::arg::PropMap;
-    use playerctl_wrapper::playerctld::Signals;
+    use playerctl_wrapper::playerctld::{DBusItem, Signals};
     use playerctl_wrapper::tracklist::Tracklist;
 
     #[test]
@@ -51,7 +51,9 @@ mod tests {
             }
         });
 
-        let _res = tl.start_listener(tx, "TrackAdded").await;
+        let _res = tl
+            .start_listener(tx, tl.get_interface(), "TrackAdded")
+            .await;
 
         assert!(1 == 2)
     }
@@ -67,7 +69,9 @@ mod tests {
             }
         });
 
-        let _res = tl.start_listener(tx, "TrackListReplaced").await;
+        let _res = tl
+            .start_listener(tx, tl.get_interface(), "TrackListReplaced")
+            .await;
 
         assert!(1 == 2)
     }
@@ -83,7 +87,9 @@ mod tests {
             }
         });
 
-        let _res = tl.start_listener(tx, "TrackMetadataChanged").await;
+        let _res = tl
+            .start_listener(tx, tl.get_interface(), "TrackMetadataChanged")
+            .await;
 
         assert!(1 == 2)
     }
@@ -99,7 +105,9 @@ mod tests {
             }
         });
 
-        let _res = tl.start_listener(tx, "TrackRemoved").await;
+        let _res = tl
+            .start_listener(tx, tl.get_interface(), "TrackRemoved")
+            .await;
 
         assert!(1 == 2)
     }
