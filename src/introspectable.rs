@@ -4,7 +4,7 @@ use dbus::blocking::Connection;
 
 use crate::{
     dbus_utils,
-    playerctld::{DBusItem, DBusProxy, Methods},
+    playerctld::{DBusItem, DBusProxy, Methods, Properties},
 };
 
 pub struct Introspectable {
@@ -45,6 +45,8 @@ impl<'a> DBusProxy<'a> for Introspectable {
 }
 
 impl Methods for Introspectable {}
+
+impl Properties for Introspectable {}
 
 impl Introspectable {
     pub fn new() -> Result<Self, dbus::Error> {

@@ -1,6 +1,7 @@
 pub mod dbus_utils;
 pub mod introspectable;
 pub mod media_player;
+pub mod metadata;
 pub mod peer;
 pub mod player;
 pub mod playerctl;

@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use crate::{
     dbus_utils,
-    playerctld::{DBusItem, DBusProxy, Methods, Signals},
+    playerctld::{DBusItem, DBusProxy, Methods, Properties, Signals},
 };
 use dbus::{blocking::Connection, Path};
 
@@ -47,6 +47,8 @@ impl Signals for Player {}
 
 impl Methods for Player {}
 
+impl Properties for Player {}
+
 impl Player {
     pub fn new() -> Result<Self, dbus::Error> {
         Ok(Self {
@@ -67,6 +69,10 @@ impl Player {
 
     pub fn pause(&self) -> Result<(), String> {
         self.call_method_no_return("Pause", ())
+    }
+
+    pub fn play(&self) -> Result<(), String> {
+        self.call_method_no_return("Play", ())
     }
 
     pub fn play_pause(&self) -> Result<(), String> {
