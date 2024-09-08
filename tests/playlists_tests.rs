@@ -1,9 +1,9 @@
-extern crate playerctl_wrapper_rs;
+extern crate playerctl_wrapper;
 
 #[cfg(test)]
 mod tests {
-    use playerctl_wrapper_rs::playerctld::Signals;
-    use playerctl_wrapper_rs::playlists::Playlists;
+    use playerctl_wrapper::playerctld::Signals;
+    use playerctl_wrapper::playlists::Playlists;
 
     #[test]
     fn test_method_activateplaylist() {

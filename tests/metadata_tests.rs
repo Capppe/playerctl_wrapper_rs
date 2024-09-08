@@ -1,9 +1,9 @@
-extern crate playerctl_wrapper_rs;
+extern crate playerctl_wrapper;
 
 #[cfg(test)]
 mod tests {
     use dbus::arg::{PropMap, Variant};
-    use playerctl_wrapper_rs::{metadata::Metadata, player::Player, playerctld::Properties};
+    use playerctl_wrapper::{metadata::Metadata, player::Player, playerctld::Properties};
 
     #[test]
     fn test_parse_metadata() {

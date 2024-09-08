@@ -1,8 +1,8 @@
-extern crate playerctl_wrapper_rs;
+extern crate playerctl_wrapper;
 
 #[cfg(test)]
 mod tests {
-    use playerctl_wrapper_rs::media_player::MediaPlayer;
+    use playerctl_wrapper::media_player::MediaPlayer;
 
     #[test]
     fn test_method_quit() {

@@ -1,10 +1,10 @@
-extern crate playerctl_wrapper_rs;
+extern crate playerctl_wrapper;
 
 #[cfg(test)]
 mod tests {
     use dbus::arg::PropMap;
-    use playerctl_wrapper_rs::playerctld::Signals;
-    use playerctl_wrapper_rs::tracklist::Tracklist;
+    use playerctl_wrapper::playerctld::Signals;
+    use playerctl_wrapper::tracklist::Tracklist;
 
     #[test]
     fn test_method_addtrack() {

@@ -1,5 +1,5 @@
 use dbus::arg::{PropMap, Variant};
-use playerctl_wrapper_rs::{metadata::Metadata, player::Player, playerctld::Properties};
+use playerctl_wrapper::{metadata::Metadata, player::Player, playerctld::Properties};
 
 // Proper error handling omitted
 fn main() {

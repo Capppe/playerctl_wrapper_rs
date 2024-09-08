@@ -1,8 +1,8 @@
-extern crate playerctl_wrapper_rs;
+extern crate playerctl_wrapper;
 
 #[cfg(test)]
 mod tests {
-    use playerctl_wrapper_rs::introspectable::Introspectable;
+    use playerctl_wrapper::introspectable::Introspectable;
 
     #[test]
     fn test_method_introspect() {

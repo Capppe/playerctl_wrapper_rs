@@ -1,9 +1,9 @@
-extern crate playerctl_wrapper_rs;
+extern crate playerctl_wrapper;
 
 #[cfg(test)]
 mod tests {
-    use playerctl_wrapper_rs::peer::Peer;
-    use playerctl_wrapper_rs::playerctld::Methods;
+    use playerctl_wrapper::peer::Peer;
+    use playerctl_wrapper::playerctld::Methods;
 
     #[test]
     fn test_method_get_machine_id() {

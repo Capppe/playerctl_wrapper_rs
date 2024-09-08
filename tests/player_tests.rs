@@ -1,9 +1,9 @@
-extern crate playerctl_wrapper_rs;
+extern crate playerctl_wrapper;
 
 #[cfg(test)]
 mod tests {
     use dbus::Path;
-    use playerctl_wrapper_rs::player::Player;
+    use playerctl_wrapper::player::Player;
 
     #[test]
     fn test_method_next() {

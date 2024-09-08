@@ -1,8 +1,8 @@
-extern crate playerctl_wrapper_rs;
+extern crate playerctl_wrapper;
 
 #[cfg(test)]
 mod tests {
-    use playerctl_wrapper_rs::properties::Properties;
+    use playerctl_wrapper::properties::Properties;
 
     #[test]
     fn test_method_get() {
