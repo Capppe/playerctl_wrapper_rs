@@ -1,4 +1,4 @@
-use std::{collections::HashMap, time::Duration};
+use std::{collections::HashMap, future::Future, time::Duration};
 
 use dbus::{
     arg::{Append, Arg, RefArg, Variant},
@@ -85,11 +85,11 @@ impl Properties {
     }
 
     // Signals
-    pub async fn properties_changed(
-        &self,
+    pub fn properties_changed<'a>(
+        &'a self,
         sender: Sender<HashMap<String, String>>,
-        interface: Option<&str>,
-    ) -> Result<(), String> {
+        interface: Option<&'a str>,
+    ) -> impl Future + 'a {
         let (tx, mut rx) = tokio::sync::mpsc::channel::<Message>(100);
 
         tokio::spawn(async move {
@@ -107,14 +107,10 @@ impl Properties {
             }
         });
 
-        let _ = self
-            .start_listener(
-                tx,
-                interface.unwrap_or(self.get_interface()),
-                "PropertiesChanged",
-            )
-            .await;
-
-        Ok(())
+        self.start_listener(
+            tx,
+            interface.unwrap_or(self.get_interface()),
+            "PropertiesChanged",
+        )
     }
 }
