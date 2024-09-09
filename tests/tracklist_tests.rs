@@ -3,8 +3,7 @@ extern crate playerctl_wrapper;
 #[cfg(test)]
 mod tests {
     use dbus::arg::PropMap;
-    use playerctl_wrapper::playerctld::{DBusItem, Signals};
-    use playerctl_wrapper::tracklist::Tracklist;
+    use playerctl_wrapper::{playerctld::DBusItem, tracklist::Tracklist};
 
     #[test]
     fn test_method_addtrack() {
@@ -47,13 +46,11 @@ mod tests {
 
         tokio::spawn(async move {
             while let Some(message) = rx.recv().await {
-                println!("Message: {}", message);
+                println!("Message: {:?}", message);
             }
         });
 
-        let _res = tl
-            .start_listener(tx, tl.get_interface(), "TrackAdded")
-            .await;
+        let _res = tl.track_added(tx, Some(tl.get_interface())).await;
 
         assert!(1 == 2)
     }
@@ -65,13 +62,11 @@ mod tests {
 
         tokio::spawn(async move {
             while let Some(message) = rx.recv().await {
-                println!("Message: {}", message);
+                println!("Message: {:?}", message);
             }
         });
 
-        let _res = tl
-            .start_listener(tx, tl.get_interface(), "TrackListReplaced")
-            .await;
+        let _res = tl.track_list_replaced(tx, Some(tl.get_interface())).await;
 
         assert!(1 == 2)
     }
@@ -83,12 +78,12 @@ mod tests {
 
         tokio::spawn(async move {
             while let Some(message) = rx.recv().await {
-                println!("Message: {}", message);
+                println!("Message: {:?}", message);
             }
         });
 
         let _res = tl
-            .start_listener(tx, tl.get_interface(), "TrackMetadataChanged")
+            .track_metadata_changed(tx, Some(tl.get_interface()))
             .await;
 
         assert!(1 == 2)
@@ -101,13 +96,11 @@ mod tests {
 
         tokio::spawn(async move {
             while let Some(message) = rx.recv().await {
-                println!("Message: {}", message);
+                println!("Message: {:?}", message);
             }
         });
 
-        let _res = tl
-            .start_listener(tx, tl.get_interface(), "TrackRemoved")
-            .await;
+        let _res = tl.track_removed(tx, Some(tl.get_interface())).await;
 
         assert!(1 == 2)
     }

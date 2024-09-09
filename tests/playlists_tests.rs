@@ -2,8 +2,7 @@ extern crate playerctl_wrapper;
 
 #[cfg(test)]
 mod tests {
-    use playerctl_wrapper::playerctld::{DBusItem, Signals};
-    use playerctl_wrapper::playlists::Playlists;
+    use playerctl_wrapper::{playerctld::DBusItem, playlists::Playlists};
 
     #[test]
     fn test_method_activateplaylist() {
@@ -31,12 +30,12 @@ mod tests {
 
         tokio::spawn(async move {
             while let Some(message) = rx.recv().await {
-                println!("Message: {}", message);
+                println!("Message: {:?}", message);
             }
         });
 
         let _res = playlists
-            .start_listener(tx, playlists.get_interface(), "PlaylistChanged")
+            .playlist_changed(tx, Some(playlists.get_interface()))
             .await;
     }
 }

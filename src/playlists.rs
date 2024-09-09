@@ -1,6 +1,7 @@
 use std::time::Duration;
 
-use dbus::{blocking::Connection, Path};
+use dbus::{blocking::Connection, Message, Path};
+use tokio::sync::mpsc::Sender;
 
 use crate::{
     dbus_utils,
@@ -72,5 +73,32 @@ impl Playlists {
         reverse_order: bool,
     ) -> Result<Vec<PlaylistType>, String> {
         self.call_method("GetPlaylists", (index, max_count, order, reverse_order))
+    }
+
+    // Signals
+    pub async fn playlist_changed(
+        &self,
+        sender: Sender<(Vec<(Path<'static>, String, String)>,)>,
+        interface: Option<&str>,
+    ) -> Result<(), String> {
+        let (tx, mut rx) = tokio::sync::mpsc::channel::<Message>(100);
+
+        tokio::spawn(async move {
+            while let Some(message) = rx.recv().await {
+                if let Ok(prop) = message.read_all::<(Vec<(Path<'static>, String, String)>,)>() {
+                    let _ = sender.send(prop).await;
+                }
+            }
+        });
+
+        let _ = self
+            .start_listener(
+                tx,
+                interface.unwrap_or(self.get_interface()),
+                "PropertiesChanged",
+            )
+            .await;
+
+        Ok(())
     }
 }

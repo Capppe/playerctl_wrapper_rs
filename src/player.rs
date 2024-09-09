@@ -4,7 +4,8 @@ use crate::{
     dbus_utils,
     playerctld::{DBusItem, DBusProxy, Methods, Properties, Signals},
 };
-use dbus::{blocking::Connection, Path};
+use dbus::{blocking::Connection, Message, Path};
+use tokio::sync::mpsc::Sender;
 
 pub struct Player {
     interface: String,
@@ -93,5 +94,28 @@ impl Player {
 
     pub fn stop(&self) -> Result<(), String> {
         self.call_method_no_return("Stop", ())
+    }
+
+    // Signals
+    pub async fn seeked(
+        &self,
+        sender: Sender<(i64,)>,
+        interface: Option<&str>,
+    ) -> Result<(), String> {
+        let (tx, mut rx) = tokio::sync::mpsc::channel::<Message>(100);
+
+        tokio::spawn(async move {
+            while let Some(message) = rx.recv().await {
+                if let Ok(prop) = message.read_all::<(i64,)>() {
+                    let _ = sender.send(prop).await;
+                }
+            }
+        });
+
+        let _ = self
+            .start_listener(tx, interface.unwrap_or(self.get_interface()), "Seeked")
+            .await;
+
+        Ok(())
     }
 }

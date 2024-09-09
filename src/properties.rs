@@ -1,17 +1,19 @@
-use std::time::Duration;
+use std::{collections::HashMap, time::Duration};
 
 use dbus::{
-    arg::{Append, Arg},
+    arg::{Append, Arg, RefArg, Variant},
     blocking::Connection,
+    Message,
 };
+use tokio::sync::mpsc::Sender;
 
 use crate::{
-    dbus_utils,
+    dbus_utils::{self, parse_propmap},
     playerctld::{DBusItem, DBusProxy, Methods, Signals},
 };
 
 pub struct Properties {
-    pub interface: String,
+    interface: String,
     object_path: String,
     connection: Connection,
 }
@@ -80,5 +82,39 @@ impl Properties {
         T: Append + dbus::arg::Arg,
     {
         self.call_method_no_return("Set", (interface_name, property_name, value))
+    }
+
+    // Signals
+    pub async fn properties_changed(
+        &self,
+        sender: Sender<HashMap<String, String>>,
+        interface: Option<&str>,
+    ) -> Result<(), String> {
+        let (tx, mut rx) = tokio::sync::mpsc::channel::<Message>(100);
+
+        tokio::spawn(async move {
+            while let Some(message) = rx.recv().await {
+                if let Ok((path, props, _arr)) = message.read_all::<(
+                    String,
+                    HashMap<String, Variant<Box<dyn RefArg>>>,
+                    Vec<String>,
+                )>() {
+                    let mut msg = parse_propmap(&props);
+                    msg.insert("Sender".to_owned(), path);
+
+                    let _ = sender.send(msg).await;
+                }
+            }
+        });
+
+        let _ = self
+            .start_listener(
+                tx,
+                interface.unwrap_or(self.get_interface()),
+                "PropertiesChanged",
+            )
+            .await;
+
+        Ok(())
     }
 }

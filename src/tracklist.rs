@@ -1,9 +1,14 @@
-use std::time::Duration;
+use std::{collections::HashMap, time::Duration};
 
-use dbus::{arg::PropMap, blocking::Connection, Path};
+use dbus::{
+    arg::{PropMap, RefArg, Variant},
+    blocking::Connection,
+    Message, Path,
+};
+use tokio::sync::mpsc::Sender;
 
 use crate::{
-    dbus_utils,
+    dbus_utils::{self, parse_propmap},
     playerctld::{DBusItem, DBusProxy, Methods, Signals},
 };
 
@@ -77,5 +82,114 @@ impl Tracklist {
 
     pub fn remove_track(&self, track_id: Path) -> Result<(), String> {
         self.call_method_no_return("RemoveTrack", (track_id,))
+    }
+
+    // Signals
+    pub async fn track_added(
+        &self,
+        sender: Sender<HashMap<String, String>>,
+        interface: Option<&str>,
+    ) -> Result<(), String> {
+        let (tx, mut rx) = tokio::sync::mpsc::channel::<Message>(100);
+
+        tokio::spawn(async move {
+            while let Some(message) = rx.recv().await {
+                if let Ok((path, props, _arr)) = message.read_all::<(
+                    String,
+                    HashMap<String, Variant<Box<dyn RefArg>>>,
+                    Vec<String>,
+                )>() {
+                    let mut msg = parse_propmap(&props);
+                    msg.insert("Sender".to_owned(), path);
+
+                    let _ = sender.send(msg).await;
+                }
+            }
+        });
+
+        let _ = self
+            .start_listener(tx, interface.unwrap_or(self.get_interface()), "TrackAdded")
+            .await;
+
+        Ok(())
+    }
+
+    pub async fn track_list_replaced(
+        &self,
+        sender: Sender<(Vec<Path<'static>>, Path<'static>)>,
+        interface: Option<&str>,
+    ) -> Result<(), String> {
+        let (tx, mut rx) = tokio::sync::mpsc::channel::<Message>(100);
+
+        tokio::spawn(async move {
+            while let Some(message) = rx.recv().await {
+                if let Ok((path, props)) = message.read_all::<(Vec<Path<'static>>, Path<'static>)>()
+                {
+                    let _ = sender.send((path, props)).await;
+                }
+            }
+        });
+
+        let _ = self
+            .start_listener(
+                tx,
+                interface.unwrap_or(self.get_interface()),
+                "TrackListReplaced",
+            )
+            .await;
+
+        Ok(())
+    }
+
+    pub async fn track_metadata_changed(
+        &self,
+        sender: Sender<(Path<'static>, PropMap)>,
+        interface: Option<&str>,
+    ) -> Result<(), String> {
+        let (tx, mut rx) = tokio::sync::mpsc::channel::<Message>(100);
+
+        tokio::spawn(async move {
+            while let Some(message) = rx.recv().await {
+                if let Ok((path, props)) = message.read_all::<(Path<'static>, PropMap)>() {
+                    let _ = sender.send((path, props)).await;
+                }
+            }
+        });
+
+        let _ = self
+            .start_listener(
+                tx,
+                interface.unwrap_or(self.get_interface()),
+                "TrackMetadataChanged",
+            )
+            .await;
+
+        Ok(())
+    }
+
+    pub async fn track_removed(
+        &self,
+        sender: Sender<(Path<'static>,)>,
+        interface: Option<&str>,
+    ) -> Result<(), String> {
+        let (tx, mut rx) = tokio::sync::mpsc::channel::<Message>(100);
+
+        tokio::spawn(async move {
+            while let Some(message) = rx.recv().await {
+                if let Ok((path,)) = message.read_all::<(Path<'static>,)>() {
+                    let _ = sender.send((path,)).await;
+                }
+            }
+        });
+
+        let _ = self
+            .start_listener(
+                tx,
+                interface.unwrap_or(self.get_interface()),
+                "TrackRemoved",
+            )
+            .await;
+
+        Ok(())
     }
 }

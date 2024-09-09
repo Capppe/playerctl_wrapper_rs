@@ -28,11 +28,7 @@ mod tests {
         let playerctl = PlayerCtl::new().unwrap();
         let (tx, mut rx) = tokio::sync::mpsc::channel(100);
 
-        tokio::spawn(async move {
-            while let Some(message) = rx.recv().await {
-                println!("Message: {}", message);
-            }
-        });
+        tokio::spawn(async move { while let Some(_message) = rx.recv().await {} });
         let _res = playerctl
             .start_listener(tx, playerctl.get_interface(), "ActivePlayerChangeBegin")
             .await;
@@ -45,11 +41,7 @@ mod tests {
         let playerctl = PlayerCtl::new().unwrap();
         let (tx, mut rx) = tokio::sync::mpsc::channel(100);
 
-        tokio::spawn(async move {
-            while let Some(message) = rx.recv().await {
-                println!("Message: {}", message);
-            }
-        });
+        tokio::spawn(async move { while let Some(_message) = rx.recv().await {} });
         let _res = playerctl
             .start_listener(tx, playerctl.get_interface(), "ActivePlayerChangeEnd")
             .await;

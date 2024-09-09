@@ -3,6 +3,7 @@ use std::time::Duration;
 use dbus::arg::Variant;
 use dbus::blocking::Connection;
 use dbus::message::MatchRule;
+use dbus::Message;
 use tokio::sync::mpsc::Sender;
 
 use crate::dbus_utils;
@@ -44,7 +45,7 @@ pub trait DBusProxy<'a> {
 pub trait Signals {
     fn start_listener(
         &self,
-        sender: Sender<String>,
+        sender: Sender<Message>,
         interface: &str,
         signal: &str,
     ) -> impl std::future::Future<Output = Result<(), String>> + Send {
@@ -65,13 +66,15 @@ pub trait Signals {
                 .await
                 .map_err(|e| format!("Failed to add signal match rule: {}", e))?
                 .stream();
-            let stream = stream.for_each(|(_, (source,)): (_, (String,))| {
+
+            let stream = stream.for_each(|(msg, (_source,)): (Message, (String,))| {
                 let sender = sender.clone();
                 tokio::spawn(async move {
-                    let _ = sender.send(source).await;
+                    let _ = sender.send(msg).await;
                 });
                 async {}
             });
+
             futures_util::join!(stream);
 
             connection

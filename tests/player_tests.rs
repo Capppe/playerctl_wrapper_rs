@@ -3,7 +3,7 @@ extern crate playerctl_wrapper;
 #[cfg(test)]
 mod tests {
     use dbus::Path;
-    use playerctl_wrapper::player::Player;
+    use playerctl_wrapper::{metadata::Metadata, player::Player, playerctld::Properties};
 
     #[test]
     fn test_method_next() {
@@ -78,5 +78,18 @@ mod tests {
         let res = player.stop().unwrap();
 
         assert!(res == ())
+    }
+
+    #[test]
+    fn test_get_metadata() {
+        let player = Player::new().unwrap();
+
+        let metadata = player.get_property("Metadata").unwrap();
+
+        let parsed_metadata = Metadata::from(&metadata);
+
+        println!("Parsed metadata: {:?}", parsed_metadata);
+
+        assert!(parsed_metadata.trackid.unwrap() != ""); // TrackId should never be 'None'
     }
 }

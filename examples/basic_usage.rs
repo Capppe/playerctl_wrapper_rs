@@ -1,4 +1,3 @@
-use dbus::arg::PropMap;
 use playerctl_wrapper::{metadata::Metadata, player::Player, playerctld::Properties};
 
 // Proper error handling omitted
@@ -7,7 +6,7 @@ fn main() {
 
     player.play().unwrap();
 
-    let metadata: PropMap = player.get_property("Metadata").unwrap();
+    let metadata = player.get_property("Metadata").unwrap();
 
     let parsed = Metadata::from(&metadata);
 
