@@ -5,7 +5,15 @@ pub fn get_string(value: &dyn RefArg) -> Option<String> {
 }
 
 pub fn get_i64(value: &dyn RefArg) -> Option<i64> {
-    value.as_i64()
+    if let Some(val) = value.as_u64() {
+        Some(val.try_into().unwrap_or(0))
+    } else if let Some(val) = value.as_f64() {
+        Some(val.as_i64()?)
+    } else if let Some(val) = value.as_i64() {
+        Some(val)
+    } else {
+        Some(0)
+    }
 }
 
 pub fn get_f64(value: &dyn RefArg) -> Option<f64> {
